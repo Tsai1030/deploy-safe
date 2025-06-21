@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { marked } from 'marked'; // --- 引入 marked 庫 ---
 
-// --- SVG 圖標組件 (假設這些是您完整的 SVG 定義) ---
+// --- SVG 圖標組件 (無變動) ---
 const MenuIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -70,7 +70,7 @@ const LogoutIcon = () => (
 );
 // --- SVG 圖標組件結束 ---
 
-// --- Modal 組件定義 ---
+// --- Modal 組件定義 (無變動) ---
 function RenameChatModal({ chatId, currentTitle, onSave, onCancel }) {
     const [newTitle, setNewTitle] = useState(currentTitle || "");
     const inputRef = useRef(null);
@@ -141,7 +141,7 @@ export default function App() {
   const [expectedAnswer, setExpectedAnswer] = useState("");
   const bottomRef = useRef(null);
   const textAreaRef = useRef(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
   const [isChatsOpen, setIsChatsOpen] = useState(true);
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -174,13 +174,13 @@ export default function App() {
   useEffect(() => { if (username && !isLoadingHistory && currentChatId === null && chatHistory.length === 0) { handleNewChat(); } // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username, isLoadingHistory, currentChatId, chatHistory.length]);
 
-  const handleSetUsername = (newUsername) => { const sanitizedUsername = newUsername.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || `user_${Date.now()}`; setUsername(sanitizedUsername); localStorage.setItem("chatAppUsername", sanitizedUsername); setShowUsernameModal(false); if (!isSidebarOpen) { setIsSidebarOpen(true); } };
+  const handleSetUsername = (newUsername) => { const sanitizedUsername = newUsername.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase() || `user_${Date.now()}`; setUsername(sanitizedUsername); localStorage.setItem("chatAppUsername", sanitizedUsername); setShowUsernameModal(false); if (window.innerWidth < 1024) { setIsSidebarOpen(false); } else { setIsSidebarOpen(true); } };
   const handleLogout = () => { localStorage.removeItem("chatAppUsername"); setUsername(null); setShowUsernameModal(true); setMessages([]); setChatHistory([]); setCurrentChatId(null); setInput(""); setIsLoadingHistory(false); setIsSidebarOpen(false); };
   const adjustTextAreaHeight = () => { const textArea = textAreaRef.current; if (textArea) { textArea.style.height = "auto"; const minHeight = 100; const maxHeight = 400; const scrollHeight = textArea.scrollHeight; let newHeight = scrollHeight; if (scrollHeight <= minHeight) newHeight = minHeight; else if (scrollHeight > maxHeight) newHeight = maxHeight; textArea.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden'; textArea.style.height = `${newHeight}px`; } };
   const handleScroll = (e) => { const ta = e.target; const maxScroll = ta.scrollHeight - ta.clientHeight - CONTROL_HEIGHT; if (ta.scrollTop > maxScroll) ta.scrollTop = maxScroll; };
 
   const sendMessage = async () => {
-    if (!username) { alert("請先設置您的用戶名稱。"); setShowUsernameModal(true); return; }
+    if (!username) { alert("請先設置您的用戶名称。"); setShowUsernameModal(true); return; }
     if (!input.trim()) return;
     let chatIdToUse = currentChatId;
     if (!chatIdToUse) { alert("請先選擇或建立一個新的對話。"); return; }
@@ -193,14 +193,14 @@ export default function App() {
     finally { setLoading(false); }
   };
 
-  const submitFeedback = async () => { if (!username) { alert("請先設置您的用戶名稱。"); setShowUsernameModal(true); return; } if (!expectedAnswer.trim() && !expectedQuestion.trim()) { alert("請至少輸入問題或預期回答。"); return; } let lastUserMessage = null, lastAssistantMessage = null; for (let i = messages.length - 1; i >= 0; i--) { if (messages[i].role === 'assistant') { lastAssistantMessage = messages[i]; if (i > 0 && messages[i-1].role === 'user') lastUserMessage = messages[i-1]; break; } } const questionForFeedback = lastUserMessage ? lastUserMessage.content : "用戶未提問或來自新對話"; const originalAnswerForFeedback = lastAssistantMessage ? lastAssistantMessage.content : "無原始回答或來自新對話"; const chatIdToUse = currentChatId; if (!chatIdToUse) { alert("無法確定當前對話以提交回饋。"); return; } try { await apiClient.post(`/feedback`, { session_id: chatIdToUse, question: questionForFeedback, model: selectedModel, original_answer: originalAnswerForFeedback, user_expected_question: expectedQuestion, user_expected_answer: expectedAnswer, }); alert("✅ 已送出回饋，感謝您的建議！"); setExpectedQuestion(""); setExpectedAnswer(""); setIsFeedbackOpen(false); } catch (err) { console.error("Submit feedback error:", err); alert("❌ 無法提交回饋，請稍後再試。"); } };
+  const submitFeedback = async () => { if (!username) { alert("請先設置您的用戶名称。"); setShowUsernameModal(true); return; } if (!expectedAnswer.trim() && !expectedQuestion.trim()) { alert("請至少輸入問題或預期回答。"); return; } let lastUserMessage = null, lastAssistantMessage = null; for (let i = messages.length - 1; i >= 0; i--) { if (messages[i].role === 'assistant') { lastAssistantMessage = messages[i]; if (i > 0 && messages[i-1].role === 'user') lastUserMessage = messages[i-1]; break; } } const questionForFeedback = lastUserMessage ? lastUserMessage.content : "用戶未提問或來自新對話"; const originalAnswerForFeedback = lastAssistantMessage ? lastAssistantMessage.content : "無原始回答或來自新對話"; const chatIdToUse = currentChatId; if (!chatIdToUse) { alert("無法確定當前對話以提交回饋。"); return; } try { await apiClient.post(`/feedback`, { session_id: chatIdToUse, question: questionForFeedback, model: selectedModel, original_answer: originalAnswerForFeedback, user_expected_question: expectedQuestion, user_expected_answer: expectedAnswer, }); alert("✅ 已送出回饋，感謝您的建議！"); setExpectedQuestion(""); setExpectedAnswer(""); setIsFeedbackOpen(false); } catch (err) { console.error("Submit feedback error:", err); alert("❌ 無法提交回饋，請稍後再試。"); } };
   const handleKeyDown = (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { adjustTextAreaHeight(); }, [input]);
   useEffect(() => { const handleClickOutside = (event) => { if (menuRef.current && !menuRef.current.contains(event.target)) { setMenuOpenForChat(null); } }; if (menuOpenForChat) document.addEventListener("mousedown", handleClickOutside); else document.removeEventListener("mousedown", handleClickOutside); return () => document.removeEventListener("mousedown", handleClickOutside); }, [menuOpenForChat]);
 
-  const handleNewChat = async () => { if (!username) { return; } setMessages([]); const newChatId = `chat_${Date.now()}`; const newChatTitle = `新對話 ${chatHistory.filter(chat => chat.title.startsWith("新對話")).length + 1}`; const newChatOptimistic = { id: newChatId, title: newChatTitle, updated_at: new Date().toISOString() }; setChatHistory(prevHistory => [newChatOptimistic, ...prevHistory].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))); setCurrentChatId(newChatId); setInput(""); try { const response = await apiClient.post(`/api/chats`, { id: newChatId, title: newChatTitle }); const actualChat = response.data; setChatHistory(prevHistory => prevHistory.map(chat => (chat.id === newChatId ? actualChat : chat)).sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at))); } catch (error) { console.error("Failed to create new chat on backend:", error); setChatHistory(prevHistory => prevHistory.filter(chat => chat.id !== newChatId)); if (currentChatId === newChatId) { const nextChat = chatHistory.length > 0 ? chatHistory[0] : null; if (nextChat) { handleSelectChat(nextChat.id, false); } else { setCurrentChatId(null); setMessages([]); } } } };
-  const handleSelectChat = async (chatId, userInitiated = true) => { if (!username) return; if (currentChatId === chatId && messages.length > 0 && userInitiated) { setMenuOpenForChat(null); return; } if (currentChatId === chatId && !userInitiated && messages.length > 0) { setMenuOpenForChat(null); return; } setMessages([]); setCurrentChatId(chatId); setInput(""); setMenuOpenForChat(null); setLoading(true); try { const response = await apiClient.get(`/api/chats/${chatId}/messages`); const loadedMessages = (response.data || []).map(msg => ({ ...msg, isMarkdown: msg.role === 'assistant' })); setMessages(loadedMessages); } catch (error) { console.error(`Failed to fetch messages for chat ${chatId}:`, error); setMessages([{ role: "assistant", content: "❌ 載入對話記錄失敗。", isMarkdown: false }]); } finally { setLoading(false); } };
+  const handleNewChat = async () => { if (!username) { return; } setMessages([]); const newChatId = `chat_${Date.now()}`; const newChatTitle = `新對話 ${chatHistory.filter(chat => chat.title.startsWith("新對話")).length + 1}`; const newChatOptimistic = { id: newChatId, title: newChatTitle, updated_at: new Date().toISOString() }; setChatHistory(prevHistory => [newChatOptimistic, ...prevHistory].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))); setCurrentChatId(newChatId); setInput(""); if (window.innerWidth < 1024) { setIsSidebarOpen(false); } try { const response = await apiClient.post(`/api/chats`, { id: newChatId, title: newChatTitle }); const actualChat = response.data; setChatHistory(prevHistory => prevHistory.map(chat => (chat.id === newChatId ? actualChat : chat)).sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at))); } catch (error) { console.error("Failed to create new chat on backend:", error); setChatHistory(prevHistory => prevHistory.filter(chat => chat.id !== newChatId)); if (currentChatId === newChatId) { const nextChat = chatHistory.length > 0 ? chatHistory[0] : null; if (nextChat) { handleSelectChat(nextChat.id, false); } else { setCurrentChatId(null); setMessages([]); } } } };
+  const handleSelectChat = async (chatId, userInitiated = true) => { if (!username) return; if (currentChatId === chatId && messages.length > 0 && userInitiated) { setMenuOpenForChat(null); return; } if (currentChatId === chatId && !userInitiated && messages.length > 0) { setMenuOpenForChat(null); return; } setMessages([]); setCurrentChatId(chatId); setInput(""); setMenuOpenForChat(null); setLoading(true); if (window.innerWidth < 1024) { setIsSidebarOpen(false); } try { const response = await apiClient.get(`/api/chats/${chatId}/messages`); const loadedMessages = (response.data || []).map(msg => ({ ...msg, isMarkdown: msg.role === 'assistant' })); setMessages(loadedMessages); } catch (error) { console.error(`Failed to fetch messages for chat ${chatId}:`, error); setMessages([{ role: "assistant", content: "❌ 載入對話記錄失敗。", isMarkdown: false }]); } finally { setLoading(false); } };
   const handleToggleChatMenu = (chatId, event) => { event.stopPropagation(); setMenuOpenForChat(prevOpenChatId => (prevOpenChatId === chatId ? null : chatId)); };
   const handleRenameChat = (chatId) => { setMenuOpenForChat(null); const chatToRename = chatHistory.find(chat => chat.id === chatId); if (chatToRename) { setModalState({ type: 'rename', chatId: chatId, currentTitle: chatToRename.title }); } };
   const handleDeleteChat = (chatId) => { setMenuOpenForChat(null); setModalState({ type: 'delete', chatId: chatId }); };
@@ -208,115 +208,90 @@ export default function App() {
   const confirmRename = async (chatId, newTitle) => { if (!username) return; if (newTitle && newTitle.trim() !== "") { const originalChat = chatHistory.find(chat => chat.id === chatId); const updated_at = new Date().toISOString(); setChatHistory(prevHistory => prevHistory.map(chat => chat.id === chatId ? { ...chat, title: newTitle.trim(), updated_at } : chat).sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at))); closeModal(); try { await apiClient.put(`/api/chats/${chatId}`, { title: newTitle.trim() }); } catch (error) { console.error(`Failed to rename chat ${chatId} on backend:`, error); alert("重命名失敗。"); if (originalChat) { setChatHistory(prevHistory => prevHistory.map(chat => chat.id === chatId ? originalChat : chat).sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at))); } } } else { alert("標題不能為空。"); } };
   const confirmDelete = async (chatId) => { if (!username) return; const chatToDelete = chatHistory.find(chat => chat.id === chatId); if (!chatToDelete) return; const oldChatHistory = [...chatHistory]; setChatHistory(prevHistory => prevHistory.filter(chat => chat.id !== chatId)); if (currentChatId === chatId) { setMessages([]); const remainingChats = oldChatHistory.filter(c => c.id !== chatId); if (remainingChats.length > 0) { const sortedRemaining = [...remainingChats].sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at)); handleSelectChat(sortedRemaining[0].id, false); } else { setCurrentChatId(null); } setInput(""); } closeModal(); try { await apiClient.delete(`/api/chats/${chatId}`); } catch (error) { console.error(`Failed to delete chat ${chatId} from backend:`, error); alert("刪除失敗。"); setChatHistory(oldChatHistory); if (currentChatId === null && oldChatHistory.some(c => c.id === chatId)) { handleSelectChat(chatId, false); } } };
 
-  // --- MODIFIED: Updated parseMarkdown function ---
-// --- In App.jsx ---
-
-
-// --- In App.jsx ---
-
-const parseMarkdown = useCallback((markdownText) => {
-  if (typeof markdownText !== 'string') {
-      return "";
-  }
-  try {
-    marked.setOptions({
-      pedantic: false,
-      gfm: true,
-      breaks: true,
-      sanitize: false,
-      smartypants: false,
-      xhtml: false
-    });
-
-    let processedText = markdownText;
-
-    // --- Preprocessing Steps ---
-
-    // 1. Unescape asterisks: Convert \* back to * (Generally safe and good first step)
-    processedText = processedText.replace(/\\\*/g, '*');
-
-    // 2. Convert "• " list prefix to "* " (Specific to lists, should not affect bold)
-    processedText = processedText.replace(/^([ \t]*)•\s+/gm, '$1* ');
-
-    // --- MODIFIED BOLD HANDLING ---
-
-    // STEP A: Handle cases where a non-whitespace character (like an emoji or symbol)
-    // is immediately followed by "**". Insert a space.
-    // Example: "💡**Bold**" -> "💡 **Bold**"
-    // Regex: (Any non-whitespace char NOT an asterisk)(Opening ** not part of ***)
-    processedText = processedText.replace(
-        // ([^\s*]) ensures the char before ** is not a space or another asterisk
-        // (\*\*(?=[^*])) ensures it's an opening ** and not part of ***
-        /([^\s*])(\*\*(?=[^*]))/gu,
-        '$1 $2' // Insert space
-    );
-
-    // STEP B: For patterns like "**Text:  **", try to move the colon and trailing spaces
-    // outside the bold markers to help `marked` parse the core bold text correctly.
-    // Example: "**Text:  **" -> "**Text**:  "
-    // This regex was effective in a previous version for this specific pattern.
-    // It looks for content, then a colon, then optional spaces, all within **...**.
-    processedText = processedText.replace(
-        /\*\*(.*?)(:)(\s*)\*\*/g, // Find **(text)(:)(spaces)**
-        (match, textPart, colon, spacesAfterColonInBold) => {
-            const trimmedTextPart = textPart.trim();
-            if (trimmedTextPart) { // Ensure there's actual text before the colon
-                // console.log(`Colon Out Fix: '${match}' -> '**${trimmedTextPart}**${colon}${spacesAfterColonInBold}'`);
-                return `**${trimmedTextPart}**${colon}${spacesAfterColonInBold}`;
-            }
-            // If textPart is empty or only spaces (e.g., "****"), don't apply this specific fix.
-            // It might be better to let marked handle it or have a more general ** cleanup later.
-            return match;
-        }
-    );
-
-    // STEP C: Normalize bold markers if LLM outputs things like ***text*** or ****text****
-    // This should run after specific colon handling, as that might have produced e.g. **text**:
-    // First, handle cases with 3+ asterisks on both sides: "****Text****" -> "**Text**"
-    processedText = processedText.replace(/\*{3,}(.+?)\*{3,}/g, '**$1**');
-    // Then, cleanup any remaining sequences of 3+ asterisks to just 2 (e.g., from unclosed ones)
-    processedText = processedText.replace(/\*{3,}/g, '**');
-    // Trim spaces inside bold markers: "** text **" -> "**text**"
-    processedText = processedText.replace(/\*\*\s*(.*?)\s*\*\*/g, '**$1**');
-
-
-    // STEP D: Ensure there's a newline *before* a heading if it's not at the start of a line
-    // and preceded by a non-newline character.
-    processedText = processedText.replace(/([^\n\r])(#+\s+[^\n\r]+)/g, '$1\n$2');
-
-    // STEP E: Add space after a colon that is NOW (potentially) OUTSIDE bold,
-    // if followed by a non-space, non-punctuation character.
-    // Example: **Title**:Something -> **Title**: Something
-    processedText = processedText.replace(/(:)(?=[^\s\W_])/g, '$1 ');
-
-
-    // For debugging:
-    if (markdownText !== processedText) {
-        // console.log("MD Original:", markdownText.substring(0,100));
-        // console.log("MD Processed:", processedText.substring(0,100));
+  const parseMarkdown = useCallback((markdownText) => {
+    if (typeof markdownText !== 'string') {
+        return "";
     }
-
-    const html = marked.parse(processedText);
-    return html;
-
-  } catch (error) {
-    console.error("Error parsing Markdown:", error, "Input (first 100 chars):", markdownText.substring(0,100));
-    return markdownText.replace(/\n/g, '<br />'); // Fallback
-  }
-}, []);
-  // --- MODIFIED END ---
-
+    try {
+      marked.setOptions({
+        pedantic: false,
+        gfm: true,
+        breaks: true,
+        sanitize: false,
+        smartypants: false,
+        xhtml: false
+      });
+  
+      let processedText = markdownText;
+      processedText = processedText.replace(/\\\*/g, '*');
+      processedText = processedText.replace(/^([ \t]*)•\s+/gm, '$1* ');
+      processedText = processedText.replace(
+          /([^\s*])(\*\*(?=[^*]))/gu,
+          '$1 $2' // Insert space
+      );
+      processedText = processedText.replace(
+          /\*\*(.*?)(:)(\s*)\*\*/g, 
+          (match, textPart, colon, spacesAfterColonInBold) => {
+              const trimmedTextPart = textPart.trim();
+              if (trimmedTextPart) {
+                  return `**${trimmedTextPart}**${colon}${spacesAfterColonInBold}`;
+              }
+              return match;
+          }
+      );
+      processedText = processedText.replace(/\*{3,}(.+?)\*{3,}/g, '**$1**');
+      processedText = processedText.replace(/\*{3,}/g, '**');
+      processedText = processedText.replace(/\*\*\s*(.*?)\s*\*\*/g, '**$1**');
+      processedText = processedText.replace(/([^\n\r])(#+\s+[^\n\r]+)/g, '$1\n$2');
+      processedText = processedText.replace(/(:)(?=[^\s\W_])/g, '$1 ');
+  
+      if (markdownText !== processedText) {
+          // console.log("MD Original:", markdownText.substring(0,100));
+          // console.log("MD Processed:", processedText.substring(0,100));
+      }
+  
+      const html = marked.parse(processedText);
+      return html;
+  
+    } catch (error) {
+      console.error("Error parsing Markdown:", error, "Input (first 100 chars):", markdownText.substring(0,100));
+      return markdownText.replace(/\n/g, '<br />'); // Fallback
+    }
+  }, []);
+  
   return (
     <>
       {showUsernameModal && <UsernameModal onSetUsername={handleSetUsername} />}
+      
+      {isSidebarOpen && username && (
+        <div
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          aria-hidden="true"
+        ></div>
+      )}
 
       <div className={`flex h-screen bg-[#F9F8F3] text-black overflow-hidden ${showUsernameModal ? 'filter blur-sm pointer-events-none' : ''}`}>
         {/* Sidebar */}
-        <div className={`transition-all duration-300 ease-in-out bg-[#F0EBE3] border-r border-gray-300 flex flex-col ${isSidebarOpen && username ? "w-72" : "w-0"} overflow-hidden`} >
+        <div className={`
+          bg-[#F0EBE3] border-r border-gray-300 flex flex-col
+          fixed lg:relative inset-y-0 left-0 z-40
+          transition-all duration-300 ease-in-out
+          transform ${isSidebarOpen && username ? 'translate-x-0' : '-translate-x-full'} lg:transform-none
+          ${username ? `w-full max-w-sm ${isSidebarOpen ? 'lg:w-72' : 'lg:w-0'}` : 'w-0'}
+          overflow-hidden
+        `}>
+
           {isSidebarOpen && username && (
-            <div className="p-4 flex flex-col h-full">
+            <div className="p-4 flex flex-col h-full overflow-y-auto">
               <div>
-                 <div className="flex items-center justify-between mb-4"> <button onClick={() => setIsSidebarOpen(false)} className="text-gray-500 hover:text-gray-700 p-1 rounded-md hover:bg-gray-200 -ml-1" aria-label="收合側邊欄"> <ChevronLeftIcon /> </button> <h2 className="text-xl font-semibold text-gray-800">KMU</h2> <div className="w-6 h-6"></div> </div>
+                 <div className="flex items-center justify-between mb-4">
+                  <button onClick={() => setIsSidebarOpen(false)} className="text-gray-500 hover:text-gray-700 p-1 rounded-md hover:bg-gray-200 -ml-1" aria-label="收合側邊欄">
+                    <ChevronLeftIcon />
+                  </button>
+                  <h2 className="text-xl font-semibold text-gray-800">KMU</h2>
+                  <div className="w-6 h-6"></div>
+                 </div>
                  <button onClick={handleNewChat} className="w-full flex items-center justify-center gap-2 px-4 py-2 mb-4 text-sm font-medium text-black bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#D38A74]"> <PlusIcon /> New chat </button>
               </div>
               <div className="flex-grow mb-4 overflow-y-auto" style={{ minHeight: '100px' }}>
@@ -368,34 +343,36 @@ const parseMarkdown = useCallback((markdownText) => {
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col h-screen overflow-hidden">
-          <header className="p-4 text-xl font-bold bg-[#F9F8F3] shadow flex items-center gap-3 relative">
+          <header className="p-4 bg-[#F9F8F3] shadow flex items-center gap-3 relative">
              {!isSidebarOpen && username && ( <button onClick={() => setIsSidebarOpen(true)} className="p-1 mr-2 text-gray-600 hover:text-black hover:bg-gray-200 rounded-md" aria-label="展開側邊欄"> <MenuIcon /> </button> )}
              <img src="/images/KMU_logo.png" alt="KMU Logo" className="w-10 h-10 object-contain" />
-             空氣汙染檢索增強(目前系統測試中較不穩定)請仔細閱讀輸出結果
+             <span className="text-sm md:text-base lg:text-xl font-bold">
+              空氣汙染檢索增強
+              <span className="hidden sm:inline">(目前系統測試中較不穩定)</span>
+              請仔細閱讀輸出結果
+            </span>
           </header>
           <main className="flex-1 overflow-y-auto px-4 py-6 space-y-4 flex flex-col font-serif">
              {loading && messages.length === 0 && currentChatId && ( <div className="flex justify-center items-center h-full"> <p className="text-gray-500">正在載入對話內容...</p> </div> )}
-             {/* --- MODIFIED: Message rendering logic --- */}
              {messages.map((msg, i) => (
                 <div key={i} className="flex justify-center">
-                    <div className="flex items-start gap-2 max-w-[800px] w-full">
+                    <div className="flex items-start gap-2 w-full max-w-4xl">
                         {msg.role === "user" && ( <img src="/images/KMU_logo.png" alt="KMU" className="w-6 h-6 mt-1 rounded-full object-contain shrink-0" /> )}
                         <div
-                            className={ "px-4 py-2 rounded-lg whitespace-pre-wrap prose prose-sm sm:prose lg:prose-lg xl:prose-xl text-black max-w-[90%] "+ (msg.role === "user" ? "bg-[#F2EFE7]" : "bg-[#F9F8F3]") }
+                            className={ "px-4 py-2 rounded-lg whitespace-pre-wrap prose prose-sm md:prose-base text-black max-w-[95%] sm:max-w-[90%] "+ (msg.role === "user" ? "bg-[#F2EFE7]" : "bg-[#F9F8F3]") }
                             dangerouslySetInnerHTML={{ __html: msg.isMarkdown ? parseMarkdown(msg.content) : msg.content.replace(/\n/g, '<br />') }}
                         ></div>
                     </div>
                 </div>
              ))}
-             {/* --- MODIFIED END --- */}
-             {loading && input === "" && messages.length > 0 && ( <div className="flex justify-center"> <div className="flex items-start gap-2 max-w-[800px] w-full justify-start"> <div className="text-gray-400 flex items-center space-x-2 font-serif max-w-[90%]"> <img src="/images/claude-color.png" alt="loading icon" className="w-5 h-5 animate-spin" /> <span>AI 正在思考中...</span> </div> </div> </div> )}
+             {loading && input === "" && messages.length > 0 && ( <div className="flex justify-center"> <div className="flex items-start gap-2 max-w-4xl w-full justify-start"> <div className="text-gray-400 flex items-center space-x-2 font-serif max-w-[90%]"> <img src="/images/claude-color.png" alt="loading icon" className="w-5 h-5 animate-spin" /> <span>AI 正在思考中...</span> </div> </div> </div> )}
              <div ref={bottomRef} />
           </main>
           <footer className="px-4 pt-0 pb-[25px] bg-[#F9F8F3] flex flex-col items-center font-serif" style={{ backgroundColor: 'transparent' }}>
-            <div className="relative w-[730px] transform -translate-y-0 -translate-x-8" style={{ backgroundColor: 'transparent' }}>
-              <div className="absolute bottom-[20px] right-[60px] z-10" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
-                <div className="relative w-[320px]" style={{ backgroundColor: 'transparent' }}>
-                  <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="appearance-none bg-transparent text-black text-sm pr-8 py-2 rounded-md w-full focus:outline-none focus:ring-0 focus:border-0 hover:ring-0 hover:bg-transparent transition-all" style={{ textAlignLast: "right", backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}>
+            <div className="relative w-full max-w-[730px] mx-auto" style={{ backgroundColor: 'transparent' }}>
+              <div className="absolute bottom-[20px] right-12 md:right-[60px] z-10" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
+                <div className="relative w-auto md:w-[320px]" style={{ backgroundColor: 'transparent' }}>
+                  <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="appearance-none bg-transparent text-black text-xs sm:text-sm pr-8 py-2 rounded-md w-full focus:outline-none focus:ring-0 focus:border-0 hover:ring-0 hover:bg-transparent transition-all" style={{ textAlignLast: "right", backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}>
                       <option value="gemma3:12b-it-q4_K_M">gemma3:12b-it-q4_K_M</option>
                       <option value="gemma3:12b">Gemma 3 12B</option>
                       <option value="qwen3:14b">Qwen 3 14B</option>
@@ -404,8 +381,8 @@ const parseMarkdown = useCallback((markdownText) => {
                   <div className="pointer-events-none absolute top-1/2 right-2 transform -translate-y-1/2" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}> <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /> </svg> </div>
                 </div>
               </div>
-              <div className="absolute bottom-[15px] left-[10px] z-10" style={{ backgroundColor: 'transparent' }}>
-                <button onClick={() => setPromptMode(promptMode === "research" ? "default" : "research")} className={`px-4 py-1 rounded-full text-sm font-medium border transition-all ${ promptMode === "research" ? "bg-[#D38A74] text-white border-[#D38A74]" : "bg-transparent text-gray-700 border-gray-400 hover:bg-gray-100" }`} style={{ boxShadow: 'none' }}> {promptMode === "research" ? "Research Mode" : "Default Mode"} </button>
+              <div className="absolute bottom-[15px] left-2 md:left-[10px] z-10" style={{ backgroundColor: 'transparent' }}>
+                <button onClick={() => setPromptMode(promptMode === "research" ? "default" : "research")} className={`px-2 py-1 sm:px-4 rounded-full text-xs sm:text-sm font-medium border transition-all ${ promptMode === "research" ? "bg-[#D38A74] text-white border-[#D38A74]" : "bg-transparent text-gray-700 border-gray-400 hover:bg-gray-100" }`} style={{ boxShadow: 'none' }}> {promptMode === "research" ? "Research Mode" : "Default Mode"} </button>
               </div>
               <div className="flex" style={{ backgroundColor: 'transparent' }}>
                 <div className="flex-1" style={{ backgroundColor: 'transparent' }}>
@@ -415,7 +392,7 @@ const parseMarkdown = useCallback((markdownText) => {
                   </div>
                 </div>
               </div>
-              <button onClick={sendMessage} disabled={!username || (!currentChatId && !input.trim()) || loading} className="absolute bottom-[20px] right-[20px] px-3 py-3 bg-[#D38A74] text-white rounded-lg hover:bg-[#c15c3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D38A74] disabled:opacity-50" > <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-3 h-3"> <path d="M12 21c-.55 0-1-.45-1-1V7.83L6.41 12.41a.996.996 0 1 1-1.41-1.41l6.3-6.29a1 1 0 0 1 1.41 0l6.29 6.29a.996.996 0 1 1-1.41 1.41L13 7.83V20c0 .55-.45 1-1 1z" /> </svg> </button>
+              <button onClick={sendMessage} disabled={!username || (!currentChatId && !input.trim()) || loading} className="absolute bottom-[20px] right-2 md:right-[20px] px-3 py-3 bg-[#D38A74] text-white rounded-lg hover:bg-[#c15c3a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D38A74] disabled:opacity-50" > <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24" className="w-3 h-3"> <path d="M12 21c-.55 0-1-.45-1-1V7.83L6.41 12.41a.996.996 0 1 1-1.41-1.41l6.3-6.29a1 1 0 0 1 1.41 0l6.29 6.29a.996.996 0 1 1-1.41 1.41L13 7.83V20c0 .55-.45 1-1 1z" /> </svg> </button>
             </div>
           </footer>
         </div>
