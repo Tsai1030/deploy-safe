@@ -356,7 +356,7 @@ export default function App() {
              {loading && messages.length === 0 && currentChatId && ( <div className="flex justify-center items-center h-full"> <p className="text-gray-500">正在載入對話內容...</p> </div> )}
              {messages.map((msg, i) => (
                 <div key={i} className="flex justify-center">
-                    <div className="flex items-start gap-2 w-full max-w-4xl">
+                    <div className="flex items-start gap-2 w-full max-w-3xl">
                         {msg.role === "user" && ( <img src="/images/KMU_logo.png" alt="KMU" className="w-6 h-6 mt-1 rounded-full object-contain shrink-0" /> )}
                         <div
                             className={ "px-4 py-2 rounded-lg whitespace-pre-wrap prose prose-sm md:prose-base text-black max-w-[95%] sm:max-w-[90%] "+ (msg.role === "user" ? "bg-[#F2EFE7]" : "bg-[#F9F8F3]") }
@@ -369,7 +369,7 @@ export default function App() {
              <div ref={bottomRef} />
           </main>
           <footer className="px-4 pt-0 pb-[25px] bg-[#F9F8F3] flex flex-col items-center font-serif" style={{ backgroundColor: 'transparent' }}>
-            <div className="relative w-full max-w-[730px] mx-auto" style={{ backgroundColor: 'transparent' }}>
+            <div className="relative w-full max-w-[750px] mx-auto" style={{ backgroundColor: 'transparent' }}>
               <div className="absolute bottom-[20px] right-12 md:right-[60px] z-10" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
                 <div className="relative w-auto md:w-[320px]" style={{ backgroundColor: 'transparent' }}>
                   <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="appearance-none bg-transparent text-black text-xs sm:text-sm pr-8 py-2 rounded-md w-full focus:outline-none focus:ring-0 focus:border-0 hover:ring-0 hover:bg-transparent transition-all" style={{ textAlignLast: "right", backgroundColor: 'transparent', boxShadow: 'none', border: 'none' }}>
