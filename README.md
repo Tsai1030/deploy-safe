@@ -69,6 +69,22 @@ uvicorn main:app --reload
 
 ---
 
+### 前端每次更新 要做的步驟
+```bash
+npm run build
+
+```
+```bash
+cd C:\nginx
+nginx -s reload
+```
+
+### 停止再啟動
+```bash
+nginx -s stop
+start nginx
+```
+
 ## 📁 專案結構（新版本）
 
 ```
